@@ -1,10 +1,18 @@
 import React, { Component } from 'react'
-import { Link } from 'react-router'
-import { Button } from '@components/Buttons'
-
+import { Link, hashHistory } from 'react-router'
+import { bindActionCreators } from 'redux'
+import { connect } from 'react-redux'
 import './index.less'
 
 class Header extends Component {
+  constructor(props) {
+    super(props)
+  }
+
+  componentDidMount() {
+
+  }
+
   render() {
     return (
       <header id="header">
@@ -14,7 +22,7 @@ class Header extends Component {
               <img alt="dribbble" src="/images/logo.png" />
             </Link>
           </div>
-          <ul role="nav" className="nav">
+          <nav role="nav" className="nav">
             <li>
               <Link to="/home" activeClassName="active">Home</Link>
             </li>
@@ -22,27 +30,32 @@ class Header extends Component {
               <Link to="/dustbin" activeClassName="active">Dustbin</Link>
             </li>
             <li>
-              <Link to="page2" activeClassName="active">page2</Link>
+              <Link to="/finacial" activeClassName="active">Finacial</Link>
             </li>
             <li>
               <Link to="page3" activeClassName="active">page3</Link>
             </li>
-          </ul>
-        </div>
-        <div className="banner-wrapper">
-          <h3><span>Ready to come?&nbsp;&nbsp;</span>Welcome to my React!</h3>
-          <div className="hello">
-            <Link to="/home">
-              <Button info="Hello →"></Button>
-            </Link>
-          </div>
-        </div>
-        <div className="banner-bottom">
-          <p>Looking to hire a designer? <Link to="/">Learn more</Link></p>
+          </nav>
         </div>
       </header>
     )
   }
 }
 
-export default Header
+const mapStateToProps = (state, ownProps) => ({
+  // ... computed data from state and optionally ownProps
+  // username: state.user.username
+});
+
+const mapDispatchToProps = (dispatch, ownProps) => {
+  return {
+    // dispatching plain actions
+    // ...bindActionCreators({ setUserInfo, clearUserInfo }, dispatch)
+    // clearUserInfo: () => dispatch({ type: CLEAR_USER_INFO })
+  };
+}
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Header)

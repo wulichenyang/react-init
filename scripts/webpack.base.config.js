@@ -4,62 +4,67 @@ const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
 
-const HappyPack = require('happypack')
-const os = require('os')
-const happyThreadPool = HappyPack.ThreadPool({ size: os.cpus().length })
-
-function resolve(relatedPath) {
+const resolve = (relatedPath) => {
   return path.join(__dirname, relatedPath)
 }
 
 const webpackConfigBase = {
   entry: {
-    main: resolve('../app/index.js'),
+    main: [
+      'babel-polyfill',
+      resolve('../app/index.js')
+    ],
   },
   output: {
     path: resolve('../dist'),
-    filename: '[name].[hash:4].js',
-    chunkFilename: 'chunks/[name].[hash:4].js',
+    // 生产环境用，开发环境chunkhash与-hot热加载冲突
+    filename: '[name].[chunkhash:4].js',
+    // filename: '[name].[hash:4].js',
+    // equire.ensure去加载模块的时候才会出现
+    chunkFilename: '[name].[chunhash:4].js',
+    publicPath:'/'
   },
   resolve: {
     extensions: ['.js', '.json'],
     alias: {
       '@app': path.join(__dirname, '../app'),
+      // redux路径引用有点问题 暂时相对路径
+      '@redux': path.join(__dirname, '../app/redux'),
       '@actions': path.join(__dirname, '../app/redux/actions'),
       '@reducers': path.join(__dirname, '../app/redux/reducers'),
-      '@apis': path.join(__dirname, '../app/apis'),
+      '@selectors': path.join(__dirname, '../app/redux/selectors'),
+      '@api': path.join(__dirname, '../app/api'),
       '@components': path.join(__dirname, '../app/components'),
       '@containers': path.join(__dirname, '../app/containers'),
       '@configs': path.join(__dirname, '../app/configs'),
-      '@config': path.join(__dirname, '../app/configs/config.js'),
-      '@ajax': path.join(__dirname, '../app/configs/ajax.js'),
-      '@reg': path.join(__dirname, '../app/configs/regular.config.js'),
       '@images': path.join(__dirname, '../app/images'),
       // '@middleware': path.join(__dirname, '../app/middleware'),
       '@pages': path.join(__dirname, '../app/pages'),
       '@styles': path.join(__dirname, '../app/styles'),
+      '@utils': path.join(__dirname, '../app/utils'),
+      '@model': path.join(__dirname, '../server/models'),
+      '@routes': path.join(__dirname, '../server/routes'),
+      '@schema': path.join(__dirname, '../server/schema'),
       // '@tableList': path.join(__dirname, '../app/components/tableList/tableList.js'),
     },
   },
-  resolveLoader: {
-    moduleExtensions: ['-loader']
-  },
+  // resolveLoader: {
+  //   moduleExtensions: ['-loader']
+  // },
   module: {
     rules: [
       {
         test: /\.js[x]?$/,
         exclude: /node_modules/,
-        // loader: 'babel',
-        //把对.js 的文件处理交给id为happyBabel 的HappyPack 的实例执行
-        loader: 'happypack/loader?id=happyBabel',
+        use: 'babel-loader?cacheDirectory=true'
       },
       {
-        test: /\.(css|less)$/,
-        loader: ExtractTextPlugin.extract({fallback: 'style', use: 'happypack/loader?id=happyStyle'}),
+        test: /\.tsx?$/,
+        loader: 'ts-loader'
       },
       {
         test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
-        loader: 'url',
+        loader: 'url-loader',
         options: {
           limit: 8192,
           name: 'img/[name].[hash:4].[ext]'
@@ -67,7 +72,7 @@ const webpackConfigBase = {
       },
       {
         test: /\.(woff|eot|ttf|svg|gif)$/,
-        loader: 'url',
+        loader: 'url-loader',
         options: {
           limit: 8192,
           name: 'font/[name].[hash:4].[ext]'
@@ -76,33 +81,17 @@ const webpackConfigBase = {
     ],
   },
   plugins: [
-    new HappyPack({
-      //用id来标识 happypack处理那里类文件
-      id: 'happyBabel',
-      //如何处理  用法和loader 的配置一样
-      loaders: [{
-        loader: 'babel?cacheDirectory=true',
-      }],
-      //代表共享进程池，即多个 HappyPack 实例都使用同一个共享进程池中的子进程去处理任务，以防止资源占用过多。
-      threadPool: happyThreadPool,
-      //允许 HappyPack 输出日志
-      verbose: true,
+    // 将打包后的资源注入到html文件内    
+    new HtmlWebpackPlugin({
+      filename: 'index.html',
+      template: resolve('../app/index.html'),
     }),
-    new HappyPack({
-      //用id来标识 happypack处理那里类文件
-      id: 'happyStyle',
-      //如何处理  用法和loader 的配置一样
-      loaders: [ 'css-loader?sourceMap=true', 'less-loader?sourceMap=true' ], 
-      //代表共享进程池，即多个 HappyPack 实例都使用同一个共享进程池中的子进程去处理任务，以防止资源占用过多。
-      threadPool: happyThreadPool,
-      //允许 HappyPack 输出日志
-      verbose: true,
-    }),
-    // 提取css
-    new ExtractTextPlugin('style.[hash:4].css'),
+    // vendor hash名字保持不变
+    new webpack.HashedModuleIdsPlugin(),
+    // 包含了 node_modules 里的公共js包统一打包到vendor里
     new webpack.optimize.CommonsChunkPlugin({
-      name: 'common', // 入口文件名
-      filename: 'common.[hash:4].js', // 打包后的文件名
+      name: 'vendor', // 入口文件名
+      filename: 'vendor.[chunkhash:4].js', // 打包后的文件名
       minChunks: function (module, count) {
         return module.resource &&
           /\.js$/.test(module.resource) &&
@@ -110,9 +99,16 @@ const webpackConfigBase = {
       }
     }),
     new webpack.optimize.CommonsChunkPlugin({
-      async: 'async-common',
-      minChunks: 3,
+      name: 'runtime'
     }),
+    new webpack.optimize.CommonsChunkPlugin({
+      name: 'manifest',
+      minChunks: Infinity,
+    }),
+    // new webpack.optimize.CommonsChunkPlugin({
+    //   async: 'async-common',
+    //   minChunks: 3,
+    // }),
   ]
 }
 

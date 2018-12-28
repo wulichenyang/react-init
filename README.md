@@ -10,7 +10,7 @@ react@16.0 + redux@3.7.2 + react-router@3.2.0 + webpack@3.10.0 + axios@0.18.0 + 
 ```
 git clone https://github.com/wulichenyang/react-init.git  
 
-cd react-init （进入当前的项目）
+cd react-gallery （进入当前的项目）
 
 npm install  (安装依赖包)
 
@@ -19,7 +19,6 @@ npm run dev (运行本地开发环境)
 npm run mock (运行 mockjs http://highsea90.com/t/mock/)
 
 npm run build (打包，部署)
-
 ```
 
 服务端返回的格式定义这样一个数据结构
@@ -34,7 +33,7 @@ npm run build (打包，部署)
     ],
   },
   msg: '',
-  status: 1,
+  status: 0/1 (0 -> success / 1 -> error)
 }
 
 ```

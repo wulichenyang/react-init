@@ -8,7 +8,6 @@
   .nav-wrapper {
     display: flex;
     width: 100%;
-    height: 56px;
     justify-content: flex-start;
     background-color: @banner-gray;
     #logo {
@@ -28,16 +27,19 @@
         }
       }
     }
-    ul.nav {
+    nav {
       display: flex;
       width: 100%;
       flex-direction: row;
+      flex-wrap: wrap;
       &>li {
         display: flex;
+        height: 56px;
         align-items: center;
         padding: 0 10px;
         list-style-type: none;
         &>a {
+          text-decoration: none;
           color: @nav-font;
         }
         &>a.active {
@@ -46,6 +48,28 @@
         &>a:hover {
           color: @nav-font-hover;
         }
+      }
+    }
+    .user-info {
+      font-size: 13px;
+      display: flex; 
+      margin-right: 30px;
+      .user-name {
+        color: #ddd;
+      }
+      a, span {
+        display: flex;
+        margin: 0 5px;
+        justify-content: center;
+        align-items: center;
+        white-space: nowrap;
+      }
+
+      a {
+        color: #ddd
+      }
+      a:hover {
+        color: #fff;
       }
     }
   }
@@ -76,7 +100,7 @@
       color: @nav-font;
       a {
         color: @white;
-        text-decoration: underline;
+        text-decoration: none;
       }
     }
   }

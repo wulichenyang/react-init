@@ -1,30 +1,24 @@
 import React, { Component } from 'react';
 import { Router, Route, Redirect, IndexRoute, hashHistory } from 'react-router'
 
-import Home from '@components/Home'
 import Index from '@components/Index'
-import NotFound from '@components/NotFound'
-import Dustbin from '@components/Dustbin'
-import Page2 from '@components/Page2'
-import Page3 from '@components/Page3'
+import Home from '@pages/Home'
+import NotFound from '@pages/NotFound'
 
 class App extends Component {
-	render() {
-		return (
+  render() {
+    return (
       <Router history={hashHistory}>
-        <Redirect from="/" to="/home" />  
+        <Redirect from="/" to="/home" />
         <Route path="/" component={Index}>
-          {/* <IndexRoute component={Home} /> */}
-          <Route path="/home" component={Home}/>
-					<Route  path="/dustbin" component={Dustbin}/>
-					<Route  path="/page2" component={Page2}/>
-					<Route  path="/page3" component={Page3}/>
-          <Route path="*" component={NotFound}/>  
+          <IndexRoute component={Home} />
+          <Route path="/home" component={Home} />
+          <Route path="*" component={NotFound} />
         </Route>
       </Router>
       /* <Route path="/detail/:id" component={Detail}/>   */
-		)
-	}
+    )
+  }
 }
 
 export default App

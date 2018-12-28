@@ -13,9 +13,9 @@ class Index extends Component {
 		return (
 			<div className='wrapper'>
 				<Header />
-        <div id="content">
+        <main id="content">
           {this.props.children}
-        </div>
+        </main>
         <Footer>Footer</Footer>
 			</div>
 		)
